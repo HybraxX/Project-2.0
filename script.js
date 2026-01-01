@@ -5,7 +5,9 @@
 /* -------------------------
    TRANSLATIONS / i18n
    ------------------------- */
-const translations = {
+  console.log("script.js loaded");
+
+   const translations = {
   en: {
     welcome_message: 'Welcome back, Farmer!',
     location_title: 'Location Access Required',
@@ -709,13 +711,6 @@ function updateChartsForActiveCrop() {
   initMarketChart(cropName);  // existing
 }
 
-/* -------------------------
-   VISUAL SCAN STUB
-   ------------------------- */
-const startScanBtn = document.getElementById('startScanBtn');
-if (startScanBtn) startScanBtn.addEventListener('click', () => {
-  alert('Open the mobile camera or upload an image (integration point). This demo shows the UX placeholder.');
-});
 
 /* -------------------------
    DEVICE CONNECTION + SENSOR SWITCHES
@@ -1029,5 +1024,64 @@ function goToFarming() {
   window.location.href = "farming.html";
 }
 
+  const imageInput = document.getElementById("cropImageInput");
+  const previewContainer = document.getElementById("imagePreviewContainer");
+  const previewImage = document.getElementById("imagePreview");
+  const uploadStatus = document.getElementById("uploadStatus");
+  const diseaseBox = document.getElementById("diseaseResult");
+
+
+  imageInput.addEventListener("change", async function () {
+  const file = this.files[0];
+  if (!file) return;
+
+  // 1️⃣ Preview
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    previewImage.src = e.target.result;
+    previewContainer.classList.remove("hidden");
+  };
+  reader.readAsDataURL(file);
+
+  // 2️⃣ Upload status
+  if (uploadStatus) {
+    uploadStatus.textContent = "Uploading image...";
+    uploadStatus.classList.remove("hidden");
+  }
+
+  // 3️⃣ Upload image to backend
+  const formData = new FormData();
+  formData.append("image", file);
+
+  try {
+    const uploadResp = await fetch("http://127.0.0.1:5000/upload-leaf", {
+      method: "POST",
+      body: formData
+    });
+    const uploadResult = await uploadResp.json();
+
+    if (uploadStatus) {
+      uploadStatus.textContent = uploadResult.message;
+    }
+
+    // 4️⃣ Fetch prediction
+    const predResp = await fetch("http://127.0.0.1:5000/predict-leaf");
+    const predResult = await predResp.json();
+
+    console.log("Prediction:", predResult);
+
+    if (diseaseBox) {
+      diseaseBox.textContent =
+        `Disease: ${predResult.disease} (${predResult.confidence}%)`;
+      diseaseBox.classList.remove("hidden");
+    }
+
+  } catch (err) {
+    console.error(err);
+    if (uploadStatus) {
+      uploadStatus.textContent = "Prediction failed";
+    }
+  }
+});
 
 

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -69,13 +71,61 @@
 
     <!-- Key Metrics Section -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      <!-- Visual Diagnostics Card -->
-      <div class="card p-5 bg-green-500 text-white flex flex-col items-center justify-center text-center">
-        <i class="fas fa-camera text-4xl mb-3"></i>
-        <h3 class="text-lg font-bold mb-2" data-lang-key="visual_diag_title">Visual Field Diagnostics</h3>
-        <p class="text-sm mb-4" data-lang-key="visual_diag_desc">Identify pests & diseases from a photo.</p>
-        <button id="startScanBtn" class="bg-white text-green-600 font-bold py-2 px-4 rounded-full hover:bg-green-100 transition-colors" data-lang-key="visual_diag_button">Start Scan</button>
-      </div>
+      <!-- Visual Diagnostics Card (Image Upload Instead of Camera) -->
+       
+<div class="bg-green-500 rounded-xl p-6 flex flex-col items-center text-center min-h-[420px]">
+
+  <i class="fas fa-image text-4xl mb-3"></i>
+
+  <h3 class="text-lg font-bold mb-2" data-lang-key="visual_diag_title">
+    Visual Field Diagnostics
+  </h3>
+
+  <p class="text-sm mb-4" data-lang-key="visual_diag_desc">
+    Upload a crop image to detect pests & diseases.
+  </p>
+
+  <!-- Hidden File Input -->
+  <input 
+    type="file" 
+    id="cropImageInput"
+    accept="image/*"
+    class="hidden"
+  />
+
+  <!-- Upload Button -->
+  <button 
+    onclick="document.getElementById('cropImageInput').click()"
+    class="bg-white text-green-600 font-bold py-2 px-4 rounded-full hover:bg-green-100 transition-colors"
+  >
+    Upload Image
+  </button>
+
+  <!-- Image Preview -->
+<div id="imagePreviewContainer" class="mt-4 hidden">
+  <img 
+    id="imagePreview"
+    class="w-32 h-32 object-cover rounded-lg border-2 border-white shadow"
+    alt="Uploaded Crop Preview"
+  />
+</div>
+
+<!-- Upload Status -->
+<p id="uploadStatus" class="mt-3 text-sm font-medium text-white hidden">
+  Uploading image...
+</p>
+
+<!-- Disease Result -->
+<div
+  id="diseaseResult"
+  class="mt-3 hidden bg-white text-green-700 px-4 py-2 rounded-lg text-sm font-semibold"
+>
+  Disease: —
+</div>
+</div>
+
+
+
 
       <div class="card p-5">
         <div class="flex items-center justify-between">

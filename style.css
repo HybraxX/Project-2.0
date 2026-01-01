@@ -198,3 +198,6 @@ body { font-family: 'Inter', sans-serif; }
 .crop-btn:hover {
   background-color: #bbf7d0;
 }
+.visual-diagnostics-card {
+  min-height: 420px;
+}
