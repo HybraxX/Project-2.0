@@ -4,18 +4,29 @@ import os
 import numpy as np
 from PIL import Image
 import tensorflow as tf
+import tempfile  # <--- Added this to find your system's temp folder
 
 app = Flask(__name__)
 CORS(app)
 
-UPLOAD_FOLDER = "uploads"
+# ------------------------------------------------------------------
+# ✅ FIX: Save images to the System Temp folder (outside project)
+# This prevents VS Code Live Server from reloading the page
+# ------------------------------------------------------------------
+UPLOAD_FOLDER = os.path.join(tempfile.gettempdir(), "agri_sight_uploads")
 IMAGE_NAME = "test_leaf.jpg"
 MODEL_PATH = "crop_disease_cnn_model.keras"
 
+# Create the temp folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+print(f"📂 Images will be saved to: {UPLOAD_FOLDER}")  # Prints the path for you to see
 
 # Load CNN model (safe & stable)
-model = tf.keras.models.load_model(MODEL_PATH)
+try:
+    model = tf.keras.models.load_model(MODEL_PATH)
+    print("✅ Model loaded successfully.")
+except Exception as e:
+    print(f"❌ Error loading model: {e}")
 
 # ⚠️ UPDATE THIS LIST to match YOUR training dataset order
 CLASS_NAMES = [
@@ -58,8 +69,14 @@ def upload_leaf():
         return jsonify({"error": "No image file found"}), 400
 
     file = request.files["image"]
+    
+    # Save to the external temp folder
     save_path = os.path.join(UPLOAD_FOLDER, IMAGE_NAME)
-    file.save(save_path)
+    try:
+        file.save(save_path)
+        print(f"📸 Image saved to: {save_path}")
+    except Exception as e:
+        return jsonify({"error": f"Failed to save image: {str(e)}"}), 500
 
     return jsonify({
         "message": "Image uploaded successfully",
@@ -68,21 +85,25 @@ def upload_leaf():
 
 @app.route("/predict-leaf", methods=["GET"])
 def predict_leaf():
+    # Read from the external temp folder
     image_path = os.path.join(UPLOAD_FOLDER, IMAGE_NAME)
 
     if not os.path.exists(image_path):
         return jsonify({"error": "No image uploaded yet"}), 400
 
-    img = preprocess_image(image_path)
-    preds = model.predict(img)
+    try:
+        img = preprocess_image(image_path)
+        preds = model.predict(img)
 
-    class_index = int(np.argmax(preds))
-    confidence = float(np.max(preds))
+        class_index = int(np.argmax(preds))
+        confidence = float(np.max(preds))
 
-    return jsonify({
-        "disease": CLASS_NAMES[class_index],
-        "confidence": round(confidence * 100, 2)
-    }), 200
+        return jsonify({
+            "disease": CLASS_NAMES[class_index],
+            "confidence": round(confidence * 100, 2)
+        }), 200
+    except Exception as e:
+        return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -95,11 +95,12 @@
 
   <!-- Upload Button -->
   <button 
-    onclick="document.getElementById('cropImageInput').click()"
-    class="bg-white text-green-600 font-bold py-2 px-4 rounded-full hover:bg-green-100 transition-colors"
-  >
-    Upload Image
-  </button>
+  type="button" 
+  onclick="event.preventDefault(); document.getElementById('cropImageInput').click()" 
+  class="bg-white text-green-600 font-bold py-2 px-4 rounded-full hover:bg-green-100 transition-colors"
+>
+  Upload Image
+</button>
 
   <!-- Image Preview -->
 <div id="imagePreviewContainer" class="mt-4 hidden">

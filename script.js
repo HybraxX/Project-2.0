@@ -1069,7 +1069,7 @@ function goToFarming() {
     const predResult = await predResp.json();
 
     console.log("Prediction:", predResult);
-
+    
     if (diseaseBox) {
       diseaseBox.textContent =
         `Disease: ${predResult.disease} (${predResult.confidence}%)`;
