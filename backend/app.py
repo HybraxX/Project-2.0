@@ -50,6 +50,36 @@ CLASS_NAMES = [
     "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
     "Tomato___Tomato_mosaic_virus",
     "Tomato___healthy"
+    "Banana Black Sigatoka Disease"
+    "Banana Bract Mosaic Virus Disease"
+    "Banana Healthy Leaf"
+    "Banana Insect Pest Disease",
+    "Banana Moko Disease",
+    "Banana Panama Disease",
+    "Banana Yellow Sigatoka Disease",
+    "Black Gram_anthracnose",
+    "Black Gram_healthy",
+    "Black Gram_leaf crinkle",
+    "Black Gram_powdery mildew",
+    "Black Gram_yellow mosaic",
+    "Broccoli",
+    "Cabbage",
+    "Cardamom_Blight1000",
+    "Cardamom_Healthy_1000",
+    "Cardamom_Phylosticta_LS_1000",
+    "Eggplant Healthy Leaf",
+    "Eggplant Insect Pest Disease",
+    "Eggplant Leaf Spot Disease",
+    "Eggplant Mosaic Virus Disease",
+    "Eggplant Small Leaf Disease",
+    "Eggplant White Mold Disease",
+    "Eggplant Wilt Disease",
+    "Ginger_Bacterial_Wilt",
+    "Ginger_Healthy",
+    "groundnut_healthy",
+    "Jackfruit_Algal_Leaf_Spot",
+    "Jackfruit_Black_Spot"
+
 ]
 
 def preprocess_image(image_path):
