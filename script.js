@@ -1,13 +1,13 @@
 /* =========================
-   script.js — Full site logic
+   script.js — Full site logic (Updated with Gemini AI)
    ========================= */
 
 /* -------------------------
    TRANSLATIONS / i18n
    ------------------------- */
-  console.log("script.js loaded");
+console.log("script.js loaded");
 
-   const translations = {
+const translations = {
   en: {
     welcome_message: 'Welcome back, Farmer!',
     location_title: 'Location Access Required',
@@ -119,7 +119,6 @@
 };
 
 function setLanguage(lang = 'en') {
-  // Update all texts based on translations
   document.querySelectorAll('[data-lang-key]').forEach(el => {
     const key = el.getAttribute('data-lang-key');
     if (translations[lang] && translations[lang][key]) {
@@ -153,8 +152,6 @@ function setLanguage(lang = 'en') {
       }
     });
   }
-
-  // Set <html lang="">
   document.documentElement.lang = lang;
 }
 
@@ -211,24 +208,19 @@ const weatherDisplay = document.getElementById('weatherDisplay');
 const weatherDetail = document.getElementById('weatherDetail');
 const weatherIcon = document.getElementById('weatherIcon');
 
-// Replace with your OpenWeatherMap API key to enable live fetches
+// Replace with your OpenWeatherMap API key
 const OPENWEATHER_API_KEY = 'd88e93af3e36ea377bf84d64f92ec221';
 
-// show modal only if geolocation available
 if (locationModal) {
   if (!navigator.geolocation) {
-    // hide modal and show fallback text
     locationModal.style.display = 'none';
     if (weatherDisplay) weatherDisplay.innerHTML = 'N/A';
     if (weatherDetail) weatherDetail.textContent = translations['en'].weather_detail;
   } else {
-    // show modal on load
-    // prefer CSS flex display — but only show if not already hidden by server-side
     locationModal.style.display = 'flex';
   }
 }
 
-// helper: update weather UI
 function setWeatherUI({ temp, condition, description, city, country }) {
   if (weatherDisplay) weatherDisplay.innerHTML = `${Math.round(temp)}°C <span class="text-lg font-medium">${condition}</span>`;
   if (weatherDetail) weatherDetail.textContent = `Currently: ${description}.`;
@@ -247,9 +239,8 @@ function setWeatherUI({ temp, condition, description, city, country }) {
 }
 
 function fetchWeatherForCoords(lat, lon) {
-  if (!OPENWEATHER_API_KEY || OPENWEATHER_API_KEY === 'REPLACE_WITH_YOUR_OPENWEATHER_API_KEY') {
+  if (!OPENWEATHER_API_KEY) {
     if (weatherDisplay) weatherDisplay.innerHTML = '—';
-    if (weatherDetail) weatherDetail.textContent = 'Replace OPENWEATHER_API_KEY in the script to fetch live weather.';
     return;
   }
   const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`;
@@ -266,60 +257,34 @@ function fetchWeatherForCoords(lat, lon) {
     .catch(err => {
       console.error('Weather fetch error', err);
       if (weatherDisplay) weatherDisplay.innerHTML = 'Error';
-      if (weatherDetail) weatherDetail.textContent = 'Could not fetch weather data.';
     });
 }
 
-/* allow / deny buttons */
 if (allowBtn) {
   allowBtn.addEventListener('click', () => {
     if (locationModal) locationModal.style.display = 'none';
-    if (!navigator.geolocation) {
-      if (weatherDetail) weatherDetail.textContent = 'Geolocation not supported in this browser.';
-      return;
-    }
+    if (!navigator.geolocation) return;
+    
     if (weatherDisplay) weatherDisplay.innerHTML = 'Loading...';
-    if (weatherDetail) weatherDetail.textContent = 'Fetching location...';
     navigator.geolocation.getCurrentPosition(pos => {
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
-      const locSpan = locationDisplay ? locationDisplay.querySelector('span') : null;
-      if (locSpan) locSpan.textContent = `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
-      if (OPENWEATHER_API_KEY && OPENWEATHER_API_KEY !== 'REPLACE_WITH_YOUR_OPENWEATHER_API_KEY') {
-        fetchWeatherForCoords(lat, lon);
-      } else {
-        // no API key, show guidance
-        if (weatherDisplay) weatherDisplay.innerHTML = '—';
-        if (weatherDetail) weatherDetail.textContent = 'Replace OPENWEATHER_API_KEY in the script to fetch live weather.';
-      }
+      fetchWeatherForCoords(lat, lon);
     }, err => {
       console.error('Geolocation error', err);
-      if (locationModal) locationModal.style.display = 'none';
-      if (weatherDisplay) weatherDisplay.innerHTML = 'N/A';
-      if (weatherDetail) {
-        switch (err.code) {
-          case err.PERMISSION_DENIED: weatherDetail.textContent = 'Location access was denied.'; break;
-          case err.POSITION_UNAVAILABLE: weatherDetail.textContent = 'Location information is unavailable.'; break;
-          case err.TIMEOUT: weatherDetail.textContent = 'The request to get user location timed out.'; break;
-          default: weatherDetail.textContent = 'An unknown error occurred while getting location.'; break;
-        }
-      }
-    }, { timeout: 10000 });
+    });
   });
 }
 if (denyBtn) {
   denyBtn.addEventListener('click', () => {
     if (locationModal) locationModal.style.display = 'none';
     if (weatherDisplay) weatherDisplay.innerHTML = 'N/A';
-    if (weatherDetail) weatherDetail.textContent = 'Location access was denied.';
   });
 }
 
 /* -------------------------
    IoT SENSORS
    ------------------------- */
-const SENSOR_ENDPOINT = 'REPLACE_WITH_YOUR_SENSOR_ENDPOINT_OR_API';
-
 function safeSetText(id, text) {
   const el = document.getElementById(id);
   if (el) el.textContent = text;
@@ -329,7 +294,6 @@ function safeSetWidth(id, width) {
   if (el && el.style) el.style.width = width;
 }
 
-/* Animate number updates */
 function animateNumber(el, newValue, suffix = "") {
   if (!el) return;
   const current = parseFloat(el.textContent) || 0;
@@ -354,6 +318,7 @@ function animateNumber(el, newValue, suffix = "") {
   requestAnimationFrame(step);
 }
 
+// Global variable to store latest soil data for AI
 window._LATEST_SOIL = { moisture: 38, ph: 6.4, temp: 22, nitrogen: 70, phosphorus: 55, potassium: 65, air_humidity: 62 };
 
 function updateSensorUI(data) {
@@ -368,7 +333,6 @@ function updateSensorUI(data) {
   const wl = data.water_level ?? 75;
   const at = data.air_temp ?? 29;
   const soilTemp = data.soil_temp ?? at;
-  const sp = data.speaker ?? false;
 
   // 🌱 Animate numeric updates
   animateNumber(document.getElementById("soilMoistureValue"), m, "%");
@@ -376,11 +340,10 @@ function updateSensorUI(data) {
   animateNumber(document.getElementById("soilTempValue"), soilTemp, "°C");
   animateNumber(document.getElementById("waterLevelValue"), wl, "%");
 
-  // Still update static values instantly
+  // Static values
   safeSetText('soilPhValue', Number(ph).toFixed(1));
-  safeSetText('speakerStatus', sp ? 'ON' : 'OFF');
 
-  // Nutrient bars animate via CSS width transition
+  // Nutrient bars
   safeSetWidth('nutNBar', `${n}%`);
   safeSetWidth('nutPBar', `${p}%`);
   safeSetWidth('nutKBar', `${k}%`);
@@ -389,37 +352,23 @@ function updateSensorUI(data) {
   safeSetWidth('nutKBarSmall', `${k}%`);
 
   // Update nutrient status text
-  const nStatus = n > 60 ? translations['en'].status_good : (n > 40 ? translations['en'].status_fair : translations['en'].status_low);
-  const pStatus = p > 60 ? translations['en'].status_good : (p > 40 ? translations['en'].status_fair : translations['en'].status_low);
-  const kStatus = k > 60 ? translations['en'].status_good : (k > 40 ? translations['en'].status_fair : translations['en'].status_low);
+  const nStatus = n > 60 ? 'Good' : (n > 40 ? 'Fair' : 'Low');
+  const pStatus = p > 60 ? 'Good' : (p > 40 ? 'Fair' : 'Low');
+  const kStatus = k > 60 ? 'Good' : (k > 40 ? 'Fair' : 'Low');
 
-  const elNutN = document.getElementById('nutNStatus'); if (elNutN) elNutN.textContent = nStatus;
-  const elNutP = document.getElementById('nutPStatus'); if (elNutP) elNutP.textContent = pStatus;
-  const elNutK = document.getElementById('nutKStatus'); if (elNutK) elNutK.textContent = kStatus;
-
-  const elNutNS = document.getElementById('nutNStatusSmall'); if (elNutNS) elNutNS.textContent = nStatus;
-  const elNutPS = document.getElementById('nutPStatusSmall'); if (elNutPS) elNutPS.textContent = pStatus;
-  const elNutKS = document.getElementById('nutKStatusSmall'); if (elNutKS) elNutKS.textContent = kStatus;
+  safeSetText('nutNStatusSmall', nStatus);
+  safeSetText('nutPStatusSmall', pStatus);
+  safeSetText('nutKStatusSmall', kStatus);
 
   // 🌊 Water Level Bars & Status
   const lowBar = document.getElementById("waterLowBar");
   const medBar = document.getElementById("waterMediumBar");
   const highBar = document.getElementById("waterHighBar");
 
-  // reset bars
-  if (lowBar) lowBar.style.width = "0%";
-  if (medBar) medBar.style.width = "0%";
-  if (highBar) highBar.style.width = "0%";
+  if (lowBar) lowBar.style.width = wl < 20 ? wl + "%" : "0%";
+  if (medBar) medBar.style.width = (wl >= 20 && wl <= 80) ? wl + "%" : "0%";
+  if (highBar) highBar.style.width = wl > 80 ? wl + "%" : "0%";
 
-  if (wl < 20 && lowBar) {
-    lowBar.style.width = wl + "%";
-  } else if (wl >= 20 && wl <= 80 && medBar) {
-    medBar.style.width = wl + "%";
-  } else if (wl > 80 && highBar) {
-    highBar.style.width = wl + "%";
-  }
-
-  // update status text
   const statusEl = document.getElementById("waterLevelStatus");
   if (statusEl) {
     if (wl > 80) {
@@ -434,7 +383,7 @@ function updateSensorUI(data) {
     }
   }
 
-  // Save latest soil state for recommendations
+  // Save latest soil state for AI
   window._LATEST_SOIL = { moisture: m, ph: ph, temp: soilTemp, nitrogen: n, phosphorus: p, potassium: k, air_humidity: ah };
 }
 
@@ -449,156 +398,102 @@ function fetchSensorData() {
     nitrogen: Math.floor(Math.random() * 40) + 50,
     phosphorus: Math.floor(Math.random() * 30) + 40,
     potassium: Math.floor(Math.random() * 30) + 45,
-    speaker: false
   };
   updateSensorUI(mock);
-  return Promise.resolve(mock);
 }
 fetchSensorData();
 setInterval(fetchSensorData, 12000);
 
 /* -------------------------
-   AI Crop Recommendations & Soil Amendments
+   GEMINI AI: Soil Amendments
    ------------------------- */
+async function suggestSoilAmendments() {
+  const amendmentBox = document.getElementById("amendmentSuggestions");
+  const suggestBtn = document.getElementById("suggestBtn");
 
-// Example AI rules for crops (simple, replace with ML model later)
-const cropRequirements = {
-  Wheat: { moisture: [35, 60], ph: [6, 7.5], n: 40, p: 30, k: 20 },
-  Rice: { moisture: [50, 80], ph: [5.5, 7], n: 50, p: 40, k: 30 },
-  Maize: { moisture: [30, 60], ph: [5.5, 7.5], n: 45, p: 35, k: 25 },
-  Tomato: { moisture: [40, 70], ph: [6, 7], n: 35, p: 30, k: 20 },
-  Potato: { moisture: [50, 75], ph: [5, 6.5], n: 50, p: 40, k: 30 }
-};
-
-// 1️⃣ AI Recommender (based on sensor data)
-function aiCropRecommendations() {
-  const cropSuggestions = document.getElementById("cropSuggestions");
-  cropSuggestions.innerHTML = "";
-
-  // Sensor Data (from IoT / fallback)
-  const soil = {
-    moisture: window._LATEST_SOIL?.soilMoisture || 40,
-    ph: window._LATEST_SOIL?.ph || 6.5,
-    n: window._LATEST_SOIL?.n || 30,
-    p: window._LATEST_SOIL?.p || 25,
-    k: window._LATEST_SOIL?.k || 20,
-    temp: window._LATEST_SOIL?.soilTemp || 28
-  };
-
-  // Evaluate each crop
-  let suitableCrops = [];
-  for (let crop in cropRequirements) {
-    const req = cropRequirements[crop];
-    if (
-      soil.moisture >= req.moisture[0] &&
-      soil.moisture <= req.moisture[1] &&
-      soil.ph >= req.ph[0] &&
-      soil.ph <= req.ph[1]
-    ) {
-      suitableCrops.push(crop);
-    }
-  }
-
-  // Show results
-  if (suitableCrops.length > 0) {
-    cropSuggestions.innerHTML = `
-      <div class="p-4 bg-green-100 rounded-xl shadow-md">
-        <h4 class="font-bold text-green-800">🌱 Recommended Crops (AI)</h4>
-        <p class="mt-2">Based on your soil & sensor data, you can grow:</p>
-        <ul class="list-disc list-inside mt-2 text-green-700 font-medium">
-          ${suitableCrops.map(c => `<li>${c}</li>`).join("")}
-        </ul>
-      </div>
-    `;
-  } else {
-    cropSuggestions.innerHTML = `
-      <div class="p-4 bg-yellow-100 rounded-xl shadow-md">
-        <h4 class="font-bold text-yellow-800">⚠️ No perfect match found</h4>
-        <p class="mt-2">Your soil conditions don’t exactly match standard crops. Try improving soil first.</p>
-      </div>
-    `;
-  }
-}
-
-// 2️⃣ Soil Amendments (user inputs their own crop)
-function suggestSoilAmendments() {
-  const userCrop = document.getElementById("cropInput").value.trim();
-  const amendmentSuggestions = document.getElementById("amendmentSuggestions");
-  amendmentSuggestions.innerHTML = "";
-
-  if (!userCrop || !cropRequirements[userCrop]) {
-    amendmentSuggestions.innerHTML = `<p class="text-red-600">⚠️ Please enter a valid crop name (e.g., Wheat, Rice, Maize).</p>`;
-    return;
-  }
-
-  // Sensor Data (from IoT / fallback)
-  const soil = {
-    moisture: window._LATEST_SOIL?.soilMoisture || 40,
-    ph: window._LATEST_SOIL?.ph || 6.5,
-    n: window._LATEST_SOIL?.n || 30,
-    p: window._LATEST_SOIL?.p || 25,
-    k: window._LATEST_SOIL?.k || 20,
-  };
-
-  const req = cropRequirements[userCrop];
-  let fixes = [];
-
-  // Compare soil vs requirements
-  if (soil.moisture < req.moisture[0]) fixes.push("💧 Increase irrigation to raise soil moisture.");
-  if (soil.moisture > req.moisture[1]) fixes.push("💧 Drain excess water to reduce soil moisture.");
-  if (soil.ph < req.ph[0]) fixes.push("⚗️ Soil is too acidic. Add lime to increase pH.");
-  if (soil.ph > req.ph[1]) fixes.push("⚗️ Soil is too alkaline. Add organic matter to lower pH.");
-  if (soil.n < req.n) fixes.push("🧪 Add Nitrogen fertilizer (e.g., Urea).");
-  if (soil.p < req.p) fixes.push("🧪 Add Phosphorus fertilizer (e.g., DAP).");
-  if (soil.k < req.k) fixes.push("🧪 Add Potassium fertilizer (e.g., MOP).");
-
-  amendmentSuggestions.innerHTML = `
-    <div class="p-4 bg-blue-100 rounded-xl shadow-md">
-      <h4 class="font-bold text-blue-800">🛠️ Soil Fix Suggestions for "${userCrop}"</h4>
-      <ul class="list-disc list-inside mt-2 text-blue-700 font-medium">
-        ${fixes.length > 0 ? fixes.map(f => `<li>${f}</li>`).join("") : "<li>✅ Your soil is already suitable!</li>"}
-      </ul>
+  // 1. UI Loading State
+  amendmentBox.innerHTML = `
+    <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-3">
+       <i class="fas fa-spinner fa-spin text-blue-600 text-xl"></i>
+       <span class="text-blue-800 font-medium">Analyzing sensor data with AI...</span>
     </div>
   `;
+  if (suggestBtn) suggestBtn.disabled = true;
+
+  // 2. Gather Sensor Data from DOM
+  const ph = document.getElementById("soilPhValue")?.innerText || "6.5";
+  const moisture = document.getElementById("soilMoistureValue")?.innerText || "40%";
+  const nStatus = document.getElementById("nutNStatusSmall")?.innerText || "Unknown";
+  const pStatus = document.getElementById("nutPStatusSmall")?.innerText || "Unknown";
+  const kStatus = document.getElementById("nutKStatusSmall")?.innerText || "Unknown";
+
+  const payload = {
+    ph: ph,
+    moisture: moisture,
+    n: nStatus,
+    p: pStatus,
+    k: kStatus
+  };
+
+  // 3. Call Backend
+  try {
+    const response = await fetch("http://127.0.0.1:5000/analyze-soil", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+       amendmentBox.innerHTML = `<p class="text-red-500 font-bold">Error: ${data.error}</p>`;
+    } else {
+       // Format text
+       const formattedText = data.suggestion.replace(/\n/g, '<br>');
+       amendmentBox.innerHTML = `
+        <div class="p-5 bg-white border-l-4 border-blue-600 shadow-sm rounded-r-lg">
+            <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+               <i class="fas fa-robot text-blue-600 mr-2"></i> AI Recommendation
+            </h4>
+            <div class="text-gray-700 text-sm leading-relaxed prose">
+               ${formattedText}
+            </div>
+        </div>
+       `;
+    }
+  } catch (err) {
+    console.error(err);
+    amendmentBox.innerHTML = `<p class="text-red-500">Failed to connect to the AI server. Is app.py running?</p>`;
+  } finally {
+    if (suggestBtn) suggestBtn.disabled = false;
+  }
 }
 
-// Attach buttons
-const recommendBtn = document.getElementById("recommendBtn");
-if (recommendBtn) recommendBtn.addEventListener("click", aiCropRecommendations);
-
+// Attach Event Listener
 const suggestBtn = document.getElementById("suggestBtn");
-if (suggestBtn) suggestBtn.addEventListener("click", suggestSoilAmendments);
+if (suggestBtn) {
+  suggestBtn.addEventListener("click", suggestSoilAmendments);
+}
 
-/* -------------------------
-   RESET BUTTON
-   ------------------------- */
+// Reset Button Logic
 const resetBtn = document.getElementById("resetBtn");
 if (resetBtn) {
   resetBtn.addEventListener("click", () => {
-    const cropInput = document.getElementById("cropInput");
-    const cropSuggestions = document.getElementById("cropSuggestions");
-    const amendmentSuggestions = document.getElementById("amendmentSuggestions");
-
-    if (cropInput) cropInput.value = "";
-    if (cropSuggestions) cropSuggestions.innerHTML = "";
-    if (amendmentSuggestions) amendmentSuggestions.innerHTML = "";
+    const amendmentBox = document.getElementById("amendmentSuggestions");
+    if (amendmentBox) amendmentBox.innerHTML = "";
   });
 }
-
-
 
 /* -------------------------
    YIELD CHART (Chart.js)
    ------------------------- */
-
-  // Mock yield data (Tons/Hectare) for last 5 years + prediction
-  const yieldData = {
-    Wheat: [3.5, 3.8, 3.6, 3.9, 3.7, 4.2],
-    Rice:  [4.0, 4.2, 4.1, 4.3, 4.5, 4.8],
-    Maize: [2.8, 3.0, 2.9, 3.2, 3.1, 3.5],
-    Tomato:[20, 22, 21, 23, 24, 26],
-    Potato:[18, 19, 18.5, 19.5, 20, 21]
-  };
+const yieldData = {
+  Wheat: [3.5, 3.8, 3.6, 3.9, 3.7, 4.2],
+  Rice:  [4.0, 4.2, 4.1, 4.3, 4.5, 4.8],
+  Maize: [2.8, 3.0, 2.9, 3.2, 3.1, 3.5],
+  Tomato:[20, 22, 21, 23, 24, 26],
+  Potato:[18, 19, 18.5, 19.5, 20, 21]
+};
 
 let yieldChartInstance = null;
 
@@ -606,14 +501,10 @@ function initYieldChart(cropName = "Wheat") {
   const canvas = document.getElementById('yieldChart');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-
   const yields = yieldData[cropName] || yieldData["Wheat"];
-
-  // ✅ Update heading dynamically
   const heading = document.getElementById("yieldChartHeading");
   if (heading) heading.textContent = `Yield History (${cropName})`;
 
-  // Destroy old chart if exists
   if (yieldChartInstance) yieldChartInstance.destroy();
 
   yieldChartInstance = new Chart(ctx, {
@@ -621,29 +512,17 @@ function initYieldChart(cropName = "Wheat") {
     data: {
       labels: ['2020', '2021', '2022', '2023', '2024', '2025 (Pred.)'],
       datasets: [{
-        label: `${cropName} Yield (Tons/Hectare)`,
+        label: `${cropName} Yield`,
         data: yields,
-        backgroundColor: [
-          'rgba(16,185,129,0.2)','rgba(16,185,129,0.2)',
-          'rgba(16,185,129,0.2)','rgba(16,185,129,0.2)',
-          'rgba(16,185,129,0.2)','rgba(59,130,246,0.4)'
-        ],
-        borderColor: [
-          'rgba(16,185,129,1)','rgba(16,185,129,1)',
-          'rgba(16,185,129,1)','rgba(16,185,129,1)',
-          'rgba(16,185,129,1)','rgba(59,130,246,1)'
-        ],
-        borderWidth: 1,
-        borderRadius: 5
+        backgroundColor: 'rgba(16,185,129,0.5)',
+        borderColor: 'rgba(16,185,129,1)',
+        borderWidth: 1
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'Tons / Hectare' } }
-      },
-      plugins: { legend: { display: false } }
+      scales: { y: { beginAtZero: true } }
     }
   });
 }
@@ -651,8 +530,6 @@ function initYieldChart(cropName = "Wheat") {
 /* -------------------------
    MARKET PRICE DATA & CHART
    ------------------------- */
-
-// Mock market price data (₹ per Quintal) for last 5 years + prediction
 const marketPriceData = {
   Wheat: [1850, 1920, 2000, 2100, 2050, 2200],
   Rice:  [1500, 1600, 1700, 1750, 1800, 1900],
@@ -663,19 +540,14 @@ const marketPriceData = {
 
 let marketChartInstance = null;
 
-// Initialize Market Price Chart
 function initMarketChart(cropName = "Wheat") {
   const canvas = document.getElementById('marketChart');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-
-  // Select crop price data (fallback = Wheat)
   const prices = marketPriceData[cropName] || marketPriceData["Wheat"];
 
-  // Destroy old chart if exists
   if (marketChartInstance) marketChartInstance.destroy();
 
-  // Create new chart
   marketChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
@@ -683,381 +555,98 @@ function initMarketChart(cropName = "Wheat") {
       datasets: [{
         label: `${cropName} Price (₹/Quintal)`,
         data: prices,
-        borderColor: 'rgba(59,130,246,1)',
-        backgroundColor: 'rgba(59,130,246,0.2)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 5,
-        pointBackgroundColor: 'rgba(59,130,246,1)'
+        borderColor: 'blue',
+        fill: false,
+        tension: 0.3
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: false,
-          title: { display: true, text: '₹ per Quintal' }
-        }
-      }
+      maintainAspectRatio: false
     }
   });
 }
 
-// Detect current crop and refresh chart
 function updateChartsForActiveCrop() {
   const cropName = document.getElementById("currentCrop")?.textContent?.trim() || "Wheat";
-  initYieldChart(cropName);   // new!
-  initMarketChart(cropName);  // existing
+  initYieldChart(cropName);
+  initMarketChart(cropName);
 }
 
-
 /* -------------------------
-   DEVICE CONNECTION + SENSOR SWITCHES
+   INIT & IMAGE UPLOAD
    ------------------------- */
-const deviceBtn = document.getElementById('deviceToggleBtn');
-const deviceStatusEl = document.getElementById('deviceStatus');
-const sensorSwitches = document.querySelectorAll('.toggle-sensor');
-let deviceConnected = false;
-
-if (deviceBtn) {
-  deviceBtn.addEventListener('click', () => {
-    deviceConnected = !deviceConnected;
-    if (deviceStatusEl) {
-      deviceStatusEl.textContent = deviceConnected ? 'Status: Connected' : 'Status: Disconnected';
-      deviceStatusEl.classList.toggle('text-green-600', deviceConnected);
-    }
-    if (deviceBtn) {
-      deviceBtn.textContent = deviceConnected ? 'Disconnect' : 'Connect';
-      deviceBtn.classList.toggle('bg-green-600', !deviceConnected);
-      deviceBtn.classList.toggle('bg-red-600', deviceConnected);
-    }
-    // show/hide sensor controls
-    const sc = document.getElementById('sensorControls');
-    if (sc) sc.classList.toggle('hidden', !deviceConnected);
-
-    // fetch fresh sensor data + auto enable all sensors on connect
-    if (deviceConnected) {
-      sensorSwitches.forEach(sw => sw.checked = true);
-      fetchSensorData();
-    }
-  });
-}
-
-// sensor toggles logging (integration points)
-sensorSwitches.forEach(input => {
-  input.addEventListener('change', () => {
-    const sensor = input.dataset.sensor;
-    const state = input.checked ? 'ON' : 'OFF';
-    console.log(`Sensor ${sensor} is now ${state}`);
-  });
-});
-
-/* -------------------------
-   INIT
-   ------------------------- */
-   // Personalized welcome
-window.addEventListener("DOMContentLoaded", () => {
-  const farmerName = localStorage.getItem("farmerName");
-  const welcomeEl = document.querySelector('[data-lang-key="welcome_message"]');
-  if (farmerName && welcomeEl) {
-    welcomeEl.textContent = `Welcome back, ${farmerName}!`;
-  }
-});
-
 window.addEventListener('load', () => {
-  // init UI pieces
-  try { initYieldChart(); } catch (e) { console.warn('Yield chart failed to initialize', e); }
-  try { initMarketChart(); } catch (e) { console.warn('Market chart failed', e); }
-  // populate initial sensor UI if mock exists
-  if (window._LATEST_SOIL) {
-    updateSensorUI(window._LATEST_SOIL);
+  // Restore selected crop from URL or Storage
+  const params = new URLSearchParams(window.location.search);
+  const cropFromUrl = params.get('crop');
+  const cropFromStorage = localStorage.getItem('selectedCrop');
+  const chosen = cropFromUrl || cropFromStorage;
+
+  if (chosen) {
+     const currentCropEl = document.getElementById('currentCrop');
+     if (currentCropEl) currentCropEl.textContent = chosen;
+     localStorage.setItem('selectedCrop', chosen); // sync
   }
 
-  // Auto logout on refresh
-  localStorage.removeItem("farmerName");
-  localStorage.removeItem("farmerEmail");
-
-  try { initYieldChart(); } catch (e) { console.warn('Yield chart failed to initialize', e); }
-  if (window._LATEST_SOIL) {
-    updateSensorUI(window._LATEST_SOIL);
-  }
-
-  // 🌍 Auto-fetch weather if location permission is already granted
+  updateChartsForActiveCrop();
+  
+  // Initialize weather
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(pos => {
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
-      fetchWeatherForCoords(lat, lon); // ✅ already defined in script.js
-    }, err => {
-      console.warn("Location fetch failed:", err);
+      fetchWeatherForCoords(pos.coords.latitude, pos.coords.longitude);
     });
   }
-});
 
-/* -------------------------
-   USER LOGIN / LOGOUT LOGIC
-   ------------------------- */
-function updateUserMenu() {
-  const farmerName = localStorage.getItem("farmerName");
-
-  const loginLink = document.getElementById("loginLink");
-  const signupLink = document.getElementById("signupLink");
-  const settingsLink = document.getElementById("settingsLink");
-  const logoutLink = document.getElementById("logoutLink");
-
-  const welcomeEl = document.querySelector('[data-lang-key="welcome_message"]');
-
-  if (farmerName) {
-    if (welcomeEl) welcomeEl.textContent = `Welcome back, ${farmerName}!`;
-    loginLink.classList.add("hidden");
-    signupLink.classList.add("hidden");
-    settingsLink.classList.remove("hidden");
-    logoutLink.classList.remove("hidden");
-  } else {
-    if (welcomeEl) welcomeEl.textContent = "Welcome back, Farmer!";
-    loginLink.classList.remove("hidden");
-    signupLink.classList.remove("hidden");
-    settingsLink.classList.add("hidden");
-    logoutLink.classList.add("hidden");
-  }
-}
-
-const logoutLink = document.getElementById("logoutLink");
-if (logoutLink) {
-  logoutLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    localStorage.removeItem("farmerName");
-    updateUserMenu();
-  });
-}
-
-window.addEventListener("DOMContentLoaded", updateUserMenu);
-
-window.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll("*").forEach(el => {
-    if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3) {
-      if (el.textContent.trim() === "Air Temperature") {
-        el.textContent = "Soil Temperature";
-      }
-    }
-  });
-});
-
-/* -------------------------
-   CROP PREFERENCES — fresh form on reload
-   ------------------------- */
-const cropListBtn = document.getElementById('cropListBtn');
-const cropDropdown = document.getElementById('cropDropdown');
-const selectedCropText = document.getElementById('selectedCropText');
-const startFarmingBtn = document.getElementById('startFarmingBtn');
-
-let selectedCrop = null; // always start blank on reload
-
-// Reset UI state on reload
-if (selectedCropText) selectedCropText.textContent = "Select Crop";
-if (startFarmingBtn) {
-  startFarmingBtn.disabled = true;
-  startFarmingBtn.classList.remove('bg-green-600','hover:bg-green-700');
-  startFarmingBtn.classList.add('bg-green-400');
-}
-
-// Toggle dropdown open/close
-if (cropListBtn) {
-  cropListBtn.addEventListener('click', (event) => {
-    event.stopPropagation();
-    if (cropDropdown) cropDropdown.classList.toggle('open');
-  });
-}
-
-// Handle crop selection
-if (cropDropdown) {
-  cropDropdown.addEventListener('click', function (event) {
-    event.preventDefault();
-    const chosenAnchor = event.target.closest('a') || event.target.closest('[role="menuitem"]');
-    if (!chosenAnchor) return;
-    const span = chosenAnchor.querySelector('span');
-    const cropName = (span ? span.textContent : chosenAnchor.textContent).trim();
-    if (!cropName) return;
-
-    selectedCrop = cropName;
-
-    // Update button text
-    if (selectedCropText) selectedCropText.textContent = `Selected: ${cropName}`;
-
-    // Save to localStorage (for farming.html use only)
-    localStorage.setItem('selectedCrop', cropName);
-
-    // Close dropdown
-    cropDropdown.classList.remove('open');
-
-    // Enable Start Farming button
-    if (startFarmingBtn) {
-      startFarmingBtn.disabled = false;
-      startFarmingBtn.classList.remove('bg-green-400');
-      startFarmingBtn.classList.add('bg-green-600','hover:bg-green-700');
-    }
-  });
-}
-
-// Start Farming button
-if (startFarmingBtn) {
-  startFarmingBtn.addEventListener('click', (e) => {
-    if (!selectedCrop) {
-      e.preventDefault();
-      alert("⚠️ Please select a crop before starting farming!");
-      return;
-    }
-    window.location.href = "farming.html?crop=" + encodeURIComponent(selectedCrop);
-  });
-}
-
-
-/* -------------------------
-   FARMING PAGE: read ?crop or localStorage → update #currentCrop
-   Append this near the end of script.js (after chart init functions if possible)
-   ------------------------- */
-window.addEventListener('load', () => {
-  try {
-    // prefer URL param (when user clicked Start Farming), fallback to localStorage
-    const params = new URLSearchParams(window.location.search);
-    const cropFromUrl = params.get('crop');
-    const cropFromStorage = localStorage.getItem('selectedCrop');
-    const chosen = (cropFromUrl && cropFromUrl.trim()) || (cropFromStorage && cropFromStorage.trim());
-
-    if (chosen) {
-      const currentCropEl = document.getElementById('currentCrop');
-      if (currentCropEl) {
-        currentCropEl.textContent = chosen;
-        // ✅ clear after use so form resets on next reload
-        localStorage.removeItem('selectedCrop');
-      }
-      // keep localStorage in sync
-      localStorage.setItem('selectedCrop', chosen);
-    }
-
-    // refresh charts that depend on currentCrop (if function exists)
-    if (typeof updateChartsForActiveCrop === 'function') {
-      updateChartsForActiveCrop();
-    }
-  } catch (err) {
-    // don't break the page if something goes wrong
-    console.warn('Crop restore error:', err);
-  }
-});
-
-// 🌱 Sync Crop Planner input with Current Crop section
-const cropInputEl = document.getElementById("cropInput");
-if (cropInputEl) {
-  cropInputEl.addEventListener("input", () => {
-    const val = cropInputEl.value.trim();
-    const currentCropEl = document.getElementById("currentCrop");
-
-    if (currentCropEl) {
-      currentCropEl.textContent = val || "None";
-    }
-
-    // Save selection so it persists after reload
-    if (val) {
-      localStorage.setItem("selectedCrop", val);
-    } else {
-      localStorage.removeItem("selectedCrop");
-    }
-
-    // Update charts if crop name is valid
-    if (typeof updateChartsForActiveCrop === "function") {
-      updateChartsForActiveCrop();
-    }
-  });
-}
-
-// 🔘 Scroll to Crop Planner Section (with offset for sticky header)
-const goToPlannerBtn = document.getElementById("goToPlannerBtn");
-if (goToPlannerBtn) {
-  goToPlannerBtn.addEventListener("click", () => {
-    const plannerSection = document.getElementById("cropPlannerSection");
-    if (plannerSection) {
-      const headerOffset = 80; // adjust this to match your header height
-      const elementPosition = plannerSection.getBoundingClientRect().top + window.scrollY;
-      const offsetPosition = elementPosition - headerOffset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
-    }
-  });
-}
-function toggleManualCrop() {
-  document.getElementById("manualCropSelect").classList.remove("hidden");
-}
-
-function selectCrop(crop) {
-  if (!crop) return;
-
-  document.getElementById("selectedCropDisplay").classList.remove("hidden");
-  document.querySelector("#selectedCropDisplay span").innerText = crop;
-
-  document.getElementById("startFarmingBtn").disabled = false;
-
-  console.log("Selected crop:", crop);
-}
-function selectCrop(crop) {
-  document.getElementById("selectedCropDisplay").classList.remove("hidden");
-  document.querySelector("#selectedCropDisplay span").innerText = crop;
-  document.getElementById("startFarmingBtn").disabled = false;
-
-  console.log("Selected crop:", crop);
-}
-function selectCrop(crop) {
-  if (!crop) return;
-
-  document.getElementById("selectedCropDisplay").classList.remove("hidden");
-  document.querySelector("#selectedCropDisplay span").innerText = crop;
-
-  document.getElementById("startFarmingBtn").disabled = false;
-
-  console.log("Selected crop:", crop);
-}
-
-function goToFarming() {
-  window.location.href = "farming.html";
-}
-
+  // Handle Image Upload Logic
   const imageInput = document.getElementById("cropImageInput");
   const previewContainer = document.getElementById("imagePreviewContainer");
   const previewImage = document.getElementById("imagePreview");
   const uploadStatus = document.getElementById("uploadStatus");
   const diseaseBox = document.getElementById("diseaseResult");
 
+  if (imageInput) {
+    imageInput.addEventListener("change", async function () {
+      const file = this.files[0];
+      if (!file) return;
 
-  imageInput.addEventListener("change", async function () {
-  const file = this.files[0];
-  if (!file) return;
+      // Preview
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        if(previewImage) previewImage.src = e.target.result;
+        if(previewContainer) previewContainer.classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
 
-  // 1️⃣ Preview
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    previewImage.src = e.target.result;
-    previewContainer.classList.remove("hidden");
-  };
-  reader.readAsDataURL(file);
+      // Status
+      if (uploadStatus) {
+        uploadStatus.textContent = "Uploading image...";
+        uploadStatus.classList.remove("hidden");
+      }
 
-  // 2️⃣ Upload status
-  if (uploadStatus) {
-    uploadStatus.textContent = "Uploading image...";
-    uploadStatus.classList.remove("hidden");
-  }
+      const formData = new FormData();
+      formData.append("image", file);
 
-  // 3️⃣ Upload image to backend
-  const formData = new FormData();
-  formData.append("image", file);
+      try {
+        await fetch("http://127.0.0.1:5000/upload-leaf", { method: "POST", body: formData });
+        
+        // Fetch prediction
+        const predResp = await fetch("http://127.0.0.1:5000/predict-leaf");
+        const predResult = await predResp.json();
 
-  try {
-    const uploadResp = await fetch("http://127.0.0.1:5000/upload-leaf", {
-      method: "POST",
-      body: formData
+        if (uploadStatus) uploadStatus.textContent = "Analysis Complete";
+        
+        if (diseaseBox) {
+          diseaseBox.innerHTML = `Disease: <strong>${predResult.disease}</strong> (${predResult.confidence}%)`;
+          diseaseBox.classList.remove("hidden");
+        }
+      } catch (err) {
+        console.error(err);
+        if (uploadStatus) uploadStatus.textContent = "Analysis failed. Check server.";
+      }
     });
+<<<<<<< HEAD
+=======
     const uploadResult = await uploadResp.json();
 
     if (uploadStatus) {
@@ -1081,7 +670,6 @@ function goToFarming() {
     if (uploadStatus) {
       uploadStatus.textContent = "Prediction failed";
     }
+>>>>>>> 849fe05aa2bd0ab739617a39154d974fb2d1df48
   }
 });
-
-
