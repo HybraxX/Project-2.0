@@ -187,7 +187,7 @@ if (userMenuButton && userMenu) {
   userMenuButton.addEventListener('click', (ev) => {
     ev.stopPropagation();
     userMenu.classList.toggle('show');
-    userMenu.classList.toggle('hidden', !userMenu.classList.contains("show"));
+    userMenu.classList.toggle("hidden", !userMenu.classList.contains("show"));
   });
   document.addEventListener('click', (ev) => {
     if (!userMenu.contains(ev.target) && !userMenuButton.contains(ev.target)) {
@@ -628,9 +628,10 @@ window.addEventListener('load', () => {
       formData.append("image", file);
 
       try {
-        await fetch("http://127.0.0.1:5000/upload-leaf", { method: "POST", body: formData });
+        // Upload
+        const uploadResp = await fetch("http://127.0.0.1:5000/upload-leaf", { method: "POST", body: formData });
         
-        // Fetch prediction
+        // Predict
         const predResp = await fetch("http://127.0.0.1:5000/predict-leaf");
         const predResult = await predResp.json();
 
@@ -645,31 +646,5 @@ window.addEventListener('load', () => {
         if (uploadStatus) uploadStatus.textContent = "Analysis failed. Check server.";
       }
     });
-<<<<<<< HEAD
-=======
-    const uploadResult = await uploadResp.json();
-
-    if (uploadStatus) {
-      uploadStatus.textContent = uploadResult.message;
-    }
-
-    // 4️⃣ Fetch prediction
-    const predResp = await fetch("http://127.0.0.1:5000/predict-leaf");
-    const predResult = await predResp.json();
-
-    console.log("Prediction:", predResult);
-    
-    if (diseaseBox) {
-      diseaseBox.textContent =
-        `Disease: ${predResult.disease} (${predResult.confidence}%)`;
-      diseaseBox.classList.remove("hidden");
-    }
-
-  } catch (err) {
-    console.error(err);
-    if (uploadStatus) {
-      uploadStatus.textContent = "Prediction failed";
-    }
->>>>>>> 849fe05aa2bd0ab739617a39154d974fb2d1df48
   }
 });

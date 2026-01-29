@@ -4,11 +4,8 @@ import os
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-<<<<<<< HEAD
 import google.generativeai as genai
-=======
-import tempfile  # <--- Added this to find your system's temp folder
->>>>>>> 849fe05aa2bd0ab739617a39154d974fb2d1df48
+import tempfile
 
 # ---------------- APP SETUP ----------------
 app = Flask(__name__)
@@ -24,16 +21,17 @@ MODEL_PATH = "crop_disease_cnn_model.keras"
 
 # Create the temp folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-print(f"📂 Images will be saved to: {UPLOAD_FOLDER}")  # Prints the path for you to see
+print(f"📂 Images will be saved to: {UPLOAD_FOLDER}")
 
-<<<<<<< HEAD
 # ---------------- GEMINI CONFIG ----------------
 GENAI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+# It is safer to warn rather than crash if the key is missing, 
+# unless Gemini is critical for app startup.
 if not GENAI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY environment variable not set")
-
-genai.configure(api_key=GENAI_API_KEY)
+    print("⚠️ WARNING: GEMINI_API_KEY not set. Soil analysis will fail.")
+else:
+    genai.configure(api_key=GENAI_API_KEY)
 
 generation_config = {
     "temperature": 0.5,
@@ -51,19 +49,11 @@ model_gemini = genai.GenerativeModel(
 # ---------------- LOAD CNN MODEL ----------------
 try:
     model = tf.keras.models.load_model(MODEL_PATH)
-    print("CNN model loaded successfully.")
+    print("✅ CNN model loaded successfully.")
 except Exception as e:
-    print(f"Error loading CNN model: {e}")
+    print(f"❌ Error loading CNN model: {e}")
     model = None
 # -----------------------------------------------
-=======
-# Load CNN model (safe & stable)
-try:
-    model = tf.keras.models.load_model(MODEL_PATH)
-    print("✅ Model loaded successfully.")
-except Exception as e:
-    print(f"❌ Error loading model: {e}")
->>>>>>> 849fe05aa2bd0ab739617a39154d974fb2d1df48
 
 CLASS_NAMES = [
     "Corn_(maize)___Cercospora_leaf_spot",
@@ -85,10 +75,10 @@ CLASS_NAMES = [
     "Tomato___Target_Spot",
     "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
     "Tomato___Tomato_mosaic_virus",
-    "Tomato___healthy"
-    "Banana Black Sigatoka Disease"
-    "Banana Bract Mosaic Virus Disease"
-    "Banana Healthy Leaf"
+    "Tomato___healthy",
+    "Banana Black Sigatoka Disease",
+    "Banana Bract Mosaic Virus Disease",
+    "Banana Healthy Leaf",
     "Banana Insect Pest Disease",
     "Banana Moko Disease",
     "Banana Panama Disease",
@@ -115,7 +105,6 @@ CLASS_NAMES = [
     "groundnut_healthy",
     "Jackfruit_Algal_Leaf_Spot",
     "Jackfruit_Black_Spot"
-
 ]
 
 # ---------------- IMAGE PREPROCESSING ----------------
@@ -135,6 +124,9 @@ def health():
 
 @app.route("/analyze-soil", methods=["POST"])
 def analyze_soil():
+    if not GENAI_API_KEY:
+        return jsonify({"suggestion": "API Key missing. Cannot analyze soil."}), 500
+
     data = request.json or {}
 
     ph = data.get("ph", "Unknown")
@@ -167,12 +159,19 @@ def analyze_soil():
 
     try:
         response = model_gemini.generate_content(primary_prompt)
+        # Check if response is valid
+        if not response.candidates:
+             return jsonify({
+                "suggestion": "Maintain regular soil monitoring, proper irrigation, and organic matter management."
+            }), 200
+            
         candidate = response.candidates[0]
 
         # If blocked, retry with ultra-safe fallback prompt
-        if candidate.finish_reason != 1:
+        if candidate.finish_reason != 1:  # 1 means STOP (success)
             response = model_gemini.generate_content(fallback_prompt)
-            candidate = response.candidates[0]
+            if response.candidates:
+                candidate = response.candidates[0]
 
         parts = candidate.content.parts
         if not parts or not hasattr(parts[0], "text"):
@@ -183,6 +182,7 @@ def analyze_soil():
         return jsonify({"suggestion": parts[0].text}), 200
 
     except Exception as e:
+        print(f"Gemini Error: {e}")
         return jsonify({
             "suggestion": "Soil health depends on balanced moisture, organic content, and regular monitoring. Adjust farming practices accordingly."
         }), 200
@@ -211,13 +211,8 @@ def upload_leaf():
 
 @app.route("/predict-leaf", methods=["GET"])
 def predict_leaf():
-<<<<<<< HEAD
     if model is None:
         return jsonify({"error": "CNN model not loaded"}), 500
-=======
-    # Read from the external temp folder
-    image_path = os.path.join(UPLOAD_FOLDER, IMAGE_NAME)
->>>>>>> 849fe05aa2bd0ab739617a39154d974fb2d1df48
 
     image_path = os.path.join(UPLOAD_FOLDER, IMAGE_NAME)
     if not os.path.exists(image_path):
@@ -226,19 +221,6 @@ def predict_leaf():
     try:
         img = preprocess_image(image_path)
         preds = model.predict(img)
-<<<<<<< HEAD
-        class_index = int(np.argmax(preds))
-        confidence = float(np.max(preds))
-
-        return jsonify({
-            "disease": CLASS_NAMES[class_index],
-            "confidence": round(confidence * 100, 2)
-        }), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-# ---------------------------------------
-=======
 
         class_index = int(np.argmax(preds))
         confidence = float(np.max(preds))
@@ -247,9 +229,9 @@ def predict_leaf():
             "disease": CLASS_NAMES[class_index],
             "confidence": round(confidence * 100, 2)
         }), 200
+
     except Exception as e:
         return jsonify({"error": f"Prediction failed: {str(e)}"}), 500
->>>>>>> 849fe05aa2bd0ab739617a39154d974fb2d1df48
 
 if __name__ == "__main__":
     app.run(debug=True)
