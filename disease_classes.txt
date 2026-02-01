@@ -1,54 +1,50 @@
-Disease Classes Dataset Mapping
-================================
-
-Banana Black Sigatoka Disease as class 1
-Banana Bract Mosaic Virus Disease as class 2
-Banana Healthy Leaf as class 3
-Banana Insect Pest Disease as class 4
-Banana Moko Disease as class 5
-Banana Panama Disease as class 6
-Banana Yellow Sigatoka Disease as class 7
-Black Gram_anthracnose as class 8
-Black Gram_healthy as class 9
-Black Gram_leaf crinckle as class 10
-Black Gram_powdery mildew as class 11
-Black Gram_yellow mosaic as class 12
-Broccoli as class 13
-Cabbage as class 14
-Cardamom_Blight1000 as class 15
-Cardamom_Healthy_1000 as class 16
-Cardamom_Phylosticta_LS_1000 as class 17
-Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot as class 18
-Corn_(maize)___Common_rust_ as class 19
-Corn_(maize)___healthy as class 20
-Corn_(maize)___Northern_Leaf_Blight as class 21
-Eggplant Healthy Leaf as class 22
-Eggplant Insect Pest Disease as class 23
-Eggplant Leaf Spot Disease as class 24
-Eggplant Mosaic Virus Disease as class 25
-Eggplant Small Leaf Disease as class 26
-Eggplant White Mold Disease as class 27
-Eggplant Wilt Disease as class 28
-Ginger_Bacterial_Wilt as class 29
-Ginger_Healthy as class 30
-groundnut_healthy as class 31
-Jackfruit_Algal_Leaf_Spot as class 32
-Jackfruit_Black_Spot as class 33
-Jackfruit_Healthy_Leaf as class 34
-Orange___Haunglongbing_(Citrus_greening) as class 35
-Potato___Early_blight as class 36
-Potato___healthy as class 37
-Potato___Late_blight_ as class 38
-Strawberry___healthy as class 39
-Strawberry___Leaf_scorch as class 40
-strawberry_leaf_scorch as class 41
-Tomato___Bacterial_spot as class 42
-Tomato___Early_blight as class 43
-Tomato___Late_blight as class 44
-Tomato___Leaf_Mold as class 45
-Tomato___Septoria_leaf_spot as class 46
-Tomato___Spider_mites Two-spotted_spider_mite as class 47
-Tomato___Target_Spot as class 48
-Tomato___Tomato_mosaic_virus as class 49
-Tomato___Tomato_Yellow_Leaf_Curl_Virus as class 50
-tomato-healthy as class 51
+Banana Black Sigatoka Disease
+Banana Bract Mosaic Virus Disease
+Banana Healthy Leaf
+Banana Insect Pest Disease
+Banana Moko Disease
+Banana Panama Disease
+Banana Yellow Sigatoka Disease
+Black Gram_anthracnose
+Black Gram_healthy
+Black Gram_leaf crinckle
+Black Gram_powdery mildew
+Black Gram_yellow mosaic
+Broccoli_healthy
+Cabbage_healthy
+Cardamom_Blight1000
+Cardamom_Healthy_1000
+Cardamom_Phylosticta_LS_1000
+Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot
+Corn_(maize)___Common_rust_
+Corn_(maize)___Northern_Leaf_Blight
+Corn_(maize)___healthy
+Eggplant Healthy Leaf
+Eggplant Insect Pest Disease
+Eggplant Leaf Spot Disease
+Eggplant Mosaic Virus Disease
+Eggplant Small Leaf Disease
+Eggplant White Mold Disease
+Eggplant Wilt Disease
+Ginger_Bacterial_Wilt
+Ginger_Healthy
+Jackfruit_Algal_Leaf_Spot
+Jackfruit_Black_Spot
+Jackfruit_Healthy_Leaf
+Orange___Haunglongbing_(Citrus_greening)
+Potato___Early_blight
+Potato___Late_blight_
+Potato___healthy
+Strawberry___Leaf_scorch
+Strawberry___healthy
+Tomato___Bacterial_spot
+Tomato___Early_blight
+Tomato___Late_blight
+Tomato___Leaf_Mold
+Tomato___Septoria_leaf_spot
+Tomato___Spider_mites Two-spotted_spider_mite
+Tomato___Target_Spot
+Tomato___Tomato_Yellow_Leaf_Curl_Virus
+Tomato___Tomato_mosaic_virus
+groundnut_healthy
+tomato-healthy
