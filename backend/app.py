@@ -8,7 +8,7 @@ import tensorflow as tf
 
 # ---------------- CONFIG ----------------
 UPLOAD_FOLDER = os.path.join(tempfile.gettempdir(), "agri_sight_uploads")
-MODEL_PATH = "crop_disease_cnn_model.keras"
+MODEL_PATH = "crop_disease_mobilenet_model.keras"
 IMAGE_NAME = "test_leaf.jpg"
 IMG_SIZE = 224
 
@@ -20,10 +20,12 @@ print(f"📂 Images will be saved to: {UPLOAD_FOLDER}")
 
 # ---------------- LOAD MODEL ----------------
 try:
-    model = tf.keras.models.load_model(MODEL_PATH)
-    print("✅ CNN model loaded successfully.")
+    # safe_mode=False is required to load models that contain Lambda layers
+    # (used for MobileNetV2 preprocessing: rescale [0,1] -> [-1,1])
+    model = tf.keras.models.load_model(MODEL_PATH, safe_mode=False)
+    print("✅ Model loaded successfully.")
 except Exception as e:
-    print("❌ Failed to load CNN model:", e)
+    print("❌ Failed to load model:", e)
     model = None
 
 # ---------------- CLASS NAMES ----------------
@@ -107,7 +109,9 @@ def predict_leaf():
 
     img = Image.open(image_path).convert("RGB")
     img = img.resize((IMG_SIZE, IMG_SIZE))
-    img_array = np.array(img) / 255.0
+    # Normalize to [0, 1] — the Lambda layer inside the model will
+    # further rescale to [-1, 1] as MobileNetV2 expects.
+    img_array = np.array(img, dtype=np.float32) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
 
     preds = model.predict(img_array)

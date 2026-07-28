@@ -68,39 +68,32 @@
           Upload a crop image to detect pests & diseases.
         </p>
 
-        <input 
-          type="file" 
+        <!-- Multiple images supported -->
+        <input
+          type="file"
           id="cropImageInput"
           accept="image/*"
+          multiple
           class="hidden"
         />
 
-        <button 
-          type="button" 
-          onclick="event.preventDefault(); document.getElementById('cropImageInput').click()" 
+        <button
+          type="button"
+          onclick="event.preventDefault(); document.getElementById('cropImageInput').click()"
           class="bg-white text-green-600 font-bold py-2 px-4 rounded-full hover:bg-green-100 transition-colors"
         >
-          Upload Image
+          Upload Images
         </button>
 
-        <div id="imagePreviewContainer" class="mt-4 hidden">
-          <img 
-            id="imagePreview"
-            class="w-32 h-32 object-cover rounded-lg border-2 border-white shadow"
-            alt="Uploaded Crop Preview"
-          />
-        </div>
-
         <p id="uploadStatus" class="mt-3 text-sm font-medium text-white hidden">
-          Uploading image...
+          Analysing...
         </p>
 
+        <!-- Per-image result cards rendered here by script.js -->
         <div
-          id="diseaseResult"
-          class="mt-3 hidden bg-white text-green-700 px-4 py-2 rounded-lg text-sm font-semibold"
-        >
-          Disease: —
-        </div>
+          id="multiResultsContainer"
+          class="mt-4 w-full hidden overflow-y-auto max-h-64 space-y-3 pr-1"
+        ></div>
       </div>
       <div class="card p-5">
         <div class="flex items-center justify-between">

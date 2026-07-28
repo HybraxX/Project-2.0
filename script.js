@@ -598,53 +598,90 @@ window.addEventListener('load', () => {
     });
   }
 
-  // Handle Image Upload Logic
+  // Handle Image Upload Logic — supports multiple files
   const imageInput = document.getElementById("cropImageInput");
-  const previewContainer = document.getElementById("imagePreviewContainer");
-  const previewImage = document.getElementById("imagePreview");
   const uploadStatus = document.getElementById("uploadStatus");
-  const diseaseBox = document.getElementById("diseaseResult");
+  const resultsContainer = document.getElementById("multiResultsContainer");
 
   if (imageInput) {
     imageInput.addEventListener("change", async function () {
-      const file = this.files[0];
-      if (!file) return;
+      const files = Array.from(this.files);
+      if (!files.length) return;
 
-      // Preview
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        if(previewImage) previewImage.src = e.target.result;
-        if(previewContainer) previewContainer.classList.remove("hidden");
-      };
-      reader.readAsDataURL(file);
-
-      // Status
+      // Clear previous results
+      if (resultsContainer) {
+        resultsContainer.innerHTML = "";
+        resultsContainer.classList.remove("hidden");
+      }
       if (uploadStatus) {
-        uploadStatus.textContent = "Uploading image...";
+        uploadStatus.textContent = `Analysing 0 / ${files.length}...`;
         uploadStatus.classList.remove("hidden");
       }
 
-      const formData = new FormData();
-      formData.append("image", file);
+      // Process each file one at a time
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
 
-      try {
-        // Upload
-        const uploadResp = await fetch("http://127.0.0.1:5000/upload-leaf", { method: "POST", body: formData });
-        
-        // Predict
-        const predResp = await fetch("http://127.0.0.1:5000/predict-leaf");
-        const predResult = await predResp.json();
-
-        if (uploadStatus) uploadStatus.textContent = "Analysis Complete";
-        
-        if (diseaseBox) {
-          diseaseBox.innerHTML = `Disease: <strong>${predResult.disease}</strong> (${predResult.confidence}%)`;
-          diseaseBox.classList.remove("hidden");
+        if (uploadStatus) {
+          uploadStatus.textContent = `Analysing ${i + 1} / ${files.length}...`;
         }
-      } catch (err) {
-        console.error(err);
-        if (uploadStatus) uploadStatus.textContent = "Analysis failed. Check server.";
+
+        // Build a result card placeholder while processing
+        const card = document.createElement("div");
+        card.className = "flex items-center gap-3 bg-white bg-opacity-20 rounded-lg p-2 text-sm";
+        card.innerHTML = `
+          <img class="w-14 h-14 object-cover rounded-md border border-white flex-shrink-0" alt="${file.name}" />
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-white truncate">${file.name}</p>
+            <p class="result-text text-white text-opacity-80 italic">Uploading...</p>
+          </div>`;
+
+        if (resultsContainer) resultsContainer.appendChild(card);
+
+        // Set thumbnail preview from local file
+        const thumbImg = card.querySelector("img");
+        const reader = new FileReader();
+        reader.onload = (e) => { if (thumbImg) thumbImg.src = e.target.result; };
+        reader.readAsDataURL(file);
+
+        const resultText = card.querySelector(".result-text");
+
+        try {
+          // 1. Upload image
+          const formData = new FormData();
+          formData.append("image", file);
+          const uploadResp = await fetch("http://127.0.0.1:5000/upload-leaf", {
+            method: "POST",
+            body: formData
+          });
+          if (!uploadResp.ok) throw new Error("Upload failed");
+
+          // 2. Predict
+          const predResp = await fetch("http://127.0.0.1:5000/predict-leaf");
+          if (!predResp.ok) throw new Error("Prediction failed");
+          const predResult = await predResp.json();
+
+          if (resultText) {
+            resultText.innerHTML = `<span class="font-bold">${predResult.disease}</span> &mdash; ${predResult.confidence}%`;
+            resultText.classList.remove("italic", "text-opacity-80");
+            resultText.classList.add("text-green-100");
+          }
+        } catch (err) {
+          console.error(`Error processing ${file.name}:`, err);
+          if (resultText) {
+            resultText.textContent = "Failed — check server.";
+            resultText.classList.add("text-red-300");
+          }
+        }
       }
+
+      // All done
+      if (uploadStatus) {
+        uploadStatus.textContent = `✅ Done — ${files.length} image${files.length > 1 ? "s" : ""} analysed.`;
+      }
+
+      // Reset the input so the same files can be re-selected if needed
+      imageInput.value = "";
     });
   }
-});
+});
