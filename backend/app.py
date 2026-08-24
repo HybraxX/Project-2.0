@@ -8,7 +8,7 @@ import tensorflow as tf
 
 # ---------------- CONFIG ----------------
 UPLOAD_FOLDER = os.path.join(tempfile.gettempdir(), "agri_sight_uploads")
-MODEL_PATH = "crop_disease_mobilenet_model.keras"
+MODEL_PATH = "crop_disease_mobilenet_plantvillage_model.keras"
 IMAGE_NAME = "test_leaf.jpg"
 IMG_SIZE = 224
 
@@ -30,56 +30,35 @@ except Exception as e:
 
 # ---------------- CLASS NAMES ----------------
 CLASS_NAMES = [
-    "Banana Black Sigatoka Disease",
-    "Banana Bract Mosaic Virus Disease",
-    "Banana Healthy Leaf",
-    "Banana Insect Pest Disease",
-    "Banana Moko Disease",
-    "Banana Panama Disease",
-    "Banana Yellow Sigatoka Disease",
-    "Black Gram_anthracnose",
-    "Black Gram_healthy",
-    "Black Gram_leaf crinckle",
-    "Black Gram_powdery mildew",
-    "Black Gram_yellow mosaic",
-    "Broccoli_healthy",
-    "Cabbage_healthy",
-    "Cardamom_Blight1000",
-    "Cardamom_Healthy_1000",
-    "Cardamom_Phylosticta_LS_1000",
-    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
-    "Corn_(maize)___Common_rust_",
-    "Corn_(maize)___Northern_Leaf_Blight",
-    "Corn_(maize)___healthy",
-    "Eggplant Healthy Leaf",
-    "Eggplant Insect Pest Disease",
-    "Eggplant Leaf Spot Disease",
-    "Eggplant Mosaic Virus Disease",
-    "Eggplant Small Leaf Disease",
-    "Eggplant White Mold Disease",
-    "Eggplant Wilt Disease",
-    "Ginger_Bacterial_Wilt",
-    "Ginger_Healthy",
-    "Jackfruit_Algal_Leaf_Spot",
-    "Jackfruit_Black_Spot",
-    "Jackfruit_Healthy_Leaf",
-    "Orange___Haunglongbing_(Citrus_greening)",
+    "Corn___Common_Rust",
+    "Corn___Gray_Leaf_Spot",
+    "Corn___Healthy",
+    "Corn___Northern_Leaf_Blight",
+    "Pepper__bell___Bacterial_spot",
+    "Pepper__bell___healthy",
     "Potato___Early_blight",
-    "Potato___Late_blight_",
+    "Potato___Late_blight",
     "Potato___healthy",
-    "Strawberry___Leaf_scorch",
-    "Strawberry___healthy",
-    "Tomato___Bacterial_spot",
-    "Tomato___Early_blight",
-    "Tomato___Late_blight",
-    "Tomato___Leaf_Mold",
-    "Tomato___Septoria_leaf_spot",
-    "Tomato___Spider_mites Two-spotted_spider_mite",
-    "Tomato___Target_Spot",
-    "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
-    "Tomato___Tomato_mosaic_virus",
-    "groundnut_healthy",
-    "tomato-healthy"
+    "Rice___Brown_Spot",
+    "Rice___Healthy",
+    "Rice___Leaf_Blast",
+    "Rice___Neck_Blast",
+    "Sugarcane_Bacterial Blight",
+    "Sugarcane_Healthy",
+    "Sugarcane_Red Rot",
+    "Tomato_Bacterial_spot",
+    "Tomato_Early_blight",
+    "Tomato_Late_blight",
+    "Tomato_Leaf_Mold",
+    "Tomato_Septoria_leaf_spot",
+    "Tomato_Spider_mites_Two_spotted_spider_mite",
+    "Tomato__Target_Spot",
+    "Tomato__Tomato_YellowLeaf__Curl_Virus",
+    "Tomato__Tomato_mosaic_virus",
+    "Tomato_healthy",
+    "Wheat___Brown_Rust",
+    "Wheat___Healthy",
+    "Wheat___Yellow_Rust"
 ]
 
 # ---------------- ROUTES ----------------
