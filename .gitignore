@@ -1,3 +1,7 @@
 # Python virtual environment
 venv/
 .venv/
+
+venv_tf210_gpu/
+*.pyd
+*.dll
